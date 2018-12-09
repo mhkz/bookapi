@@ -1,13 +1,15 @@
-package v1
+package api
 
 import (
+	"bookapi/pkg/logging"
+	"net/http"
+
+	"github.com/astaxie/beego/validation"
+	"github.com/gin-gonic/gin"
+
 	"bookapi/models"
 	"bookapi/pkg/e"
 	"bookapi/pkg/util"
-	"github.com/astaxie/beego/validation"
-	"github.com/gin-gonic/gin"
-	"log"
-	"net/http"
 )
 
 type auth struct {
@@ -16,6 +18,7 @@ type auth struct {
 }
 
 func GetAuth(c *gin.Context) {
+	logging.Info("----------------")
 	username := c.Query("username")
 	password := c.Query("password")
 
@@ -42,13 +45,13 @@ func GetAuth(c *gin.Context) {
 		}
 	} else {
 		for _, err := range valid.Errors {
-			log.Println(err.Key, err.Message)
+			logging.Info(err.Key, err.Message)
 		}
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"code" : code,
-		"msg" : e.GetMsg(code),
-		"data" : data,
+		"code": code,
+		"msg":  e.GetMsg(code),
+		"data": data,
 	})
 }

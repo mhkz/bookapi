@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bookapi/pkg/logging"
 	"bookapi/routers"
 	"fmt"
 	"net/http"
@@ -9,8 +10,8 @@ import (
 )
 
 func main() {
+	logging.Info("test")
 	router := routers.InitRouter()
-
 
 	s := &http.Server{
 		Addr:           fmt.Sprintf(":%d", setting.HTTPPort),
