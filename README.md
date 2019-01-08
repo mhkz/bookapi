@@ -1,3 +1,2 @@
 ### 第一步 拉去配置文件 go get -u github.com/go-ini/ini
-
-eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InRlc3QiLCJwYXNzd29yZCI6InRlc3QxMjM0NTYiLCJleHAiOjE1NDQyOTQ0ODgsImlzcyI6Imdpbi1ibG9nIn0.rkGKaVWCYz076Q2iOX2zoPG47E188hvRgdH3Bj-bhzs
+go get -u github.com/robfig/cron 定时任务

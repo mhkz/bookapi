@@ -5,18 +5,24 @@ import (
 	"time"
 )
 
+// 文章模型
 type Article struct {
 	Model
 
-	TagID int `json:"tag_id" gorm:"index"`
-	Tag   Tag `json:"tag"`
-
-	Title      string `json:"title"`
-	Desc       string `json:"title"`
-	Content    string `json:"content"`
-	CreatedBy  string `json:"created_by"`
-	ModifiedBy string `json:"modified_by"`
-	State      int    `json:"state"`
+	Title         string `json:"title"`               // 文章标题
+	Keywords      string `json:"keywords"`            // 文章关键字 seo
+	Description   string `json:"title"`               // 文章描述
+	Content       string `json:"content"`             // 文章内容
+	Thumb         string `json:"thumb"`               // 文章缩略图
+	State         int    `json:"state"`               // 文章发布状态 -1 回收站 0 草稿 1 已发布
+	Public        int    `json:"public"`              // 文章公开状态
+	Origin        int    `json:"origin"`              // 文章转载状态 0 原创 1 转载 2 混合
+	Password      string `json:"password"`            // 文章密码
+	CreatedAt     string `json:"created_at"`          // 创建时间
+	ModifiedAt    string `json:"modified_at"`         // 修改时间
+	TagID         int    `json:"tag_id" gorm:"index"` // 标签 id
+	Category      int    `json:"category"`            // 分类信息
+	coverImageUrl string `json:"cover_image_url"`     // 封面url
 }
 
 func ExistArticleByID(id int) bool {
@@ -44,7 +50,7 @@ func GetArticles(pageNum int, pageSize int, maps interface{}) (articles []Articl
 
 func GetArticle(id int) (article Article) {
 	db.Where("id = ?", id).First(&article)
-	db.Model(&article).Related(&article.Tag)
+	db.Model(&article).Related(&article.TagID)
 
 	return
 }
@@ -57,12 +63,12 @@ func EditArticle(id int, data interface{}) bool {
 
 func AddArticle(data map[string]interface{}) bool {
 	db.Create(&Article{
-		TagID:     data["tag_id"].(int),
-		Title:     data["title"].(string),
-		Desc:      data["desc"].(string),
-		Content:   data["content"].(string),
-		CreatedBy: data["created_by"].(string),
-		State:     data["state"].(int),
+		TagID:       data["tag_id"].(int),
+		Title:       data["title"].(string),
+		Description: data["desc"].(string),
+		Content:     data["content"].(string),
+		CreatedAt:   data["created_by"].(string),
+		State:       data["state"].(int),
 	})
 
 	return true
@@ -84,4 +90,11 @@ func (article *Article) BeforeUpdate(scope *gorm.Scope) error {
 	scope.SetColumn("ModifiedOn", time.Now().Unix())
 
 	return nil
+}
+
+// 硬删除文章
+func CleanAllArticle() bool {
+	db.Unscoped().Where("deleted_on != ? ", 0).Delete(&Article{})
+
+	return true
 }

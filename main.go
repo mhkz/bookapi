@@ -1,25 +1,59 @@
 package main
 
 import (
-	"bookapi/pkg/logging"
-	"bookapi/routers"
 	"fmt"
-	"net/http"
+	"log"
+	"syscall"
 
+	"github.com/fvbock/endless"
+
+	"bookapi/models"
+	"bookapi/pkg/logging"
 	"bookapi/pkg/setting"
+	"bookapi/routers"
 )
 
-func main() {
-	logging.Info("test")
-	router := routers.InitRouter()
+// @title Golang Gin API
+// @version 1.0
+// @description An example of gin
+// @termsOfService https://github.com/EDDYCJY/go-gin-example
 
-	s := &http.Server{
-		Addr:           fmt.Sprintf(":%d", setting.HTTPPort),
-		Handler:        router,
-		ReadTimeout:    setting.ReadTimeout,
-		WriteTimeout:   setting.WriteTimeout,
-		MaxHeaderBytes: 1 << 20,
+// @license.name MIT
+// @license.url https://github.com/EDDYCJY/go-gin-example/blob/master/LICENSE
+func main() {
+	setting.Setup()
+	models.Setup()
+	logging.Setup()
+	//gredis.Setup()
+
+	routersInit := routers.InitRouter()
+	readTimeout := setting.ServerSetting.ReadTimeout
+	writeTimeout := setting.ServerSetting.WriteTimeout
+	endPoint := fmt.Sprintf(":%d", setting.ServerSetting.HttpPort)
+	maxHeaderBytes := 1 << 20
+
+	// If it is windows, you should open and comment out the endless related code.
+	//server := &http.Server{
+	//	Addr:           endPoint,
+	//	Handler:        routersInit,
+	//	ReadTimeout:    readTimeout,
+	//	WriteTimeout:   writeTimeout,
+	//	MaxHeaderBytes: maxHeaderBytes,
+	//}
+	//
+	//server.ListenAndServe()
+	//return
+
+	endless.DefaultReadTimeOut = readTimeout
+	endless.DefaultWriteTimeOut = writeTimeout
+	endless.DefaultMaxHeaderBytes = maxHeaderBytes
+	server := endless.NewServer(endPoint, routersInit)
+	server.BeforeBegin = func(add string) {
+		log.Printf("Actual pid is %d", syscall.Getpid())
 	}
 
-	s.ListenAndServe()
+	err := server.ListenAndServe()
+	if err != nil {
+		log.Printf("Server err: %v", err)
+	}
 }
